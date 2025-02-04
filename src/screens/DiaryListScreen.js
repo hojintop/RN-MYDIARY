@@ -2,23 +2,90 @@ import { useNavigation } from "@react-navigation/native";
 import Header from "../components/Header/Header";
 import HeaderButton from "../components/Header/HeaderButton";
 import HeaderTitle from "../components/Header/HeaderTitle";
-import { View } from "react-native";
+import { FlatList, useWindowDimensions, View } from "react-native";
 import Button from "../components/Button";
 import Icons from "../components/Icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useState } from "react";
+import Typography from "../components/Typography";
+import RemoteImage from "../components/RemoteImage";
 
 export default () => {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
 
   function onPressSetting() {
     navigation.navigate("Setting");
   }
 
-  function onPressAddButton(){
+  function onPressAddButton() {
     navigation.navigate("AddDiary");
   }
-  
+
+  const [data, setData] = useState([
+    {
+      id: 0,
+      title: "TITLE-01",
+      content: "CONTENT-01",
+      createAt: "2025-02-03",
+      updateAt: "2025-02-03",
+      imageUrl:
+        "https://docs.expo.dev/static/images/tutorial/background-image.png",
+    },
+    {
+      id: 1,
+      title: "TITLE-02",
+      content: "CONTENT-02",
+      createAt: "2025-02-03",
+      updateAt: "2025-02-03",
+      imageUrl:
+        "https://docs.expo.dev/static/images/tutorial/background-image.png",
+    },
+    {
+      id: 2,
+      title: "TITLE-03",
+      content: "CONTENT-03",
+      createAt: "2025-02-03",
+      updateAt: "2025-02-03",
+    },
+  ]);
+
+  function renderItem({ item }) {
+    return (
+      <View style={{ flex: 1 }} key={`diary_${item.id}`}>
+        <View style={{ flex: 1, paddingVertical: 12 }}>
+          {item.imageUrl !== null && item.imageUrl !== undefined ? (
+            <RemoteImage
+              url={item.imageUrl}
+              width={width - 24 * 2}
+              height={(width - 24 * 2) * 0.5}
+              style={{
+                borderRadius: 10,
+                borderWidth: 0.5,
+                borderColor: "darkgray",
+                borderBottomWidth: 4, // 하단 경계선
+                shadowColor: "lightgray", // 그림자 색상
+              }}
+            ></RemoteImage>
+          ) : (
+            <View style={{justifyContent: "center", alignItems: "center"}}>
+                <Typography fontSize={18} color="gray">이미지가 없습니다.</Typography>
+            </View>
+          )}
+          <View
+            style={{ justifyContent: "space-between", flexDirection: "row" }}
+          >
+            <Typography fontSize={20}>{item.title}</Typography>
+            <Typography fontSize={15}>{item.createAt}</Typography>
+          </View>
+          <Typography fontSize={15} color="gray">
+            {item.content}
+          </Typography>
+        </View>
+      </View>
+    );
+  }
   return (
     <View style={{ flex: 1 }}>
       <Header>
@@ -26,6 +93,9 @@ export default () => {
         <HeaderButton iconName="settings-outline" onPress={onPressSetting} />
       </Header>
 
+      <View style={{ flex: 1,  }}>
+        <FlatList data={data} renderItem={renderItem} contentContainerStyle={{paddingHorizontal: 24,}}/>
+      </View>
       <View
         style={{
           position: "absolute",
@@ -36,7 +106,7 @@ export default () => {
           width: 50,
           height: 50,
           borderColor: "gray",
-          borderWidth: 0.3
+          borderWidth: 0.3,
         }}
       >
         <View

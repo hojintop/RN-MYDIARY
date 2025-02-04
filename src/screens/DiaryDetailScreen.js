@@ -5,7 +5,7 @@ import HeaderTitle from "../components/Header/HeaderTitle"
 
 export default()=>{
     const navigation = useNavigation();
-
+    
     function onPressClose(){
         navigation.goBack();
     }
