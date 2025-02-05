@@ -6,6 +6,7 @@ import firebaseAuth from "@react-native-firebase/auth"
 import database from "@react-native-firebase/database"
 import { useRecoilValue, useSetRecoilState } from "recoil"
 import { stateUserInfo } from "./states/stateUserInfo"
+import { useGetDiaryList } from "./hooks/useGetDiaryList"
 
 export default(props)=>{
 
@@ -25,6 +26,8 @@ export default(props)=>{
 
     const setUserInfo = useSetRecoilState(stateUserInfo);
 
+    const runGetDiaryList = useGetDiaryList();
+    
     async function signinUserIdentify(idToken){
         try {
             const credential = firebaseAuth.GoogleAuthProvider.credential(idToken)
@@ -59,7 +62,9 @@ export default(props)=>{
             const userInfo = await database().ref(userDBRefKey).once("value").then((snapshot)=>snapshot.val());
 
             setUserInfo(userInfo);
-           
+
+            runGetDiaryList(userInfo);
+
             props.onFinishLoad();
           
 

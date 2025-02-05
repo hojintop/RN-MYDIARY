@@ -9,8 +9,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useState } from "react";
 import Typography from "../components/Typography";
 import RemoteImage from "../components/RemoteImage";
+import { stateDiaryList } from "../states/stateDiaryList";
+import { useRecoilValue } from "recoil";
+import { useGetDiaryList } from "../hooks/useGetDiaryList";
 
 export default () => {
+  const data = useRecoilValue(stateDiaryList);
+
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
@@ -23,67 +28,75 @@ export default () => {
     navigation.navigate("AddDiary");
   }
 
-  const [data, setData] = useState([
-    {
-      id: 0,
-      title: "TITLE-01",
-      content: "CONTENT-01",
-      createAt: "2025-02-03",
-      updateAt: "2025-02-03",
-      imageUrl:
-        "https://docs.expo.dev/static/images/tutorial/background-image.png",
-    },
-    {
-      id: 1,
-      title: "TITLE-02",
-      content: "CONTENT-02",
-      createAt: "2025-02-03",
-      updateAt: "2025-02-03",
-      imageUrl:
-        "https://docs.expo.dev/static/images/tutorial/background-image.png",
-    },
-    {
-      id: 2,
-      title: "TITLE-03",
-      content: "CONTENT-03",
-      createAt: "2025-02-03",
-      updateAt: "2025-02-03",
-    },
-  ]);
+  //   const [data, setData] = useState([
+  //     {
+  //       id: 0,
+  //       title: "TITLE-01",
+  //       content: "CONTENT-01",
+  //       createAt: "2025-02-03",
+  //       updateAt: "2025-02-03",
+  //       imageUrl:
+  //         "https://docs.expo.dev/static/images/tutorial/background-image.png",
+  //     },
+  //     {
+  //       id: 1,
+  //       title: "TITLE-02",
+  //       content: "CONTENT-02",
+  //       createAt: "2025-02-03",
+  //       updateAt: "2025-02-03",
+  //       imageUrl:
+  //         "https://docs.expo.dev/static/images/tutorial/background-image.png",
+  //     },
+  //     {
+  //       id: 2,
+  //       title: "TITLE-03",
+  //       content: "CONTENT-03",
+  //       createAt: "2025-02-03",
+  //       updateAt: "2025-02-03",
+  //     },
+  //   ]);
 
+  function onPressItem(item){
+    navigation.navigate("DiaryDetail",item);
+  }
+  
   function renderItem({ item }) {
     return (
-      <View style={{ flex: 1 }} key={`diary_${item.id}`}>
-        <View style={{ flex: 1, paddingVertical: 12 }}>
-          {item.imageUrl !== null && item.imageUrl !== undefined ? (
-            <RemoteImage
-              url={item.imageUrl}
-              width={width - 24 * 2}
-              height={(width - 24 * 2) * 0.5}
-              style={{
-                borderRadius: 10,
-                borderWidth: 0.5,
-                borderColor: "darkgray",
-                borderBottomWidth: 4, // 하단 경계선
-                shadowColor: "lightgray", // 그림자 색상
-              }}
-            ></RemoteImage>
-          ) : (
-            <View style={{justifyContent: "center", alignItems: "center"}}>
-                <Typography fontSize={18} color="gray">이미지가 없습니다.</Typography>
+      <Button onPress={()=>onPressItem(item)}>
+        <View style={{ flex: 1 }} key={`diary_${item.id}`}>
+          <View style={{ flex: 1, paddingVertical: 12 }}>
+            {item.photoUrl !== null && item.photoUrl !== undefined ? (
+              <RemoteImage
+                url={item.photoUrl}
+                width={width - 24 * 2}
+                height={(width - 24 * 2) * 0.5}
+                style={{
+                  borderRadius: 10,
+                  borderWidth: 0.5,
+                  borderColor: "darkgray",
+                  borderBottomWidth: 4, // 하단 경계선
+                  shadowColor: "lightgray", // 그림자 색상
+                }}
+              ></RemoteImage>
+            ) : (
+              <View style={{ justifyContent: "center", alignItems: "center" }}>
+                <Typography fontSize={18} color="gray">
+                  이미지가 없습니다.
+                </Typography>
+              </View>
+            )}
+            <View
+              style={{ justifyContent: "space-between", flexDirection: "row" }}
+            >
+              <Typography fontSize={20}>{item.title}</Typography>
+              <Typography fontSize={15}>{item.date}</Typography>
             </View>
-          )}
-          <View
-            style={{ justifyContent: "space-between", flexDirection: "row" }}
-          >
-            <Typography fontSize={20}>{item.title}</Typography>
-            <Typography fontSize={15}>{item.createAt}</Typography>
+            <Typography fontSize={15} color="gray">
+              {item.content}
+            </Typography>
           </View>
-          <Typography fontSize={15} color="gray">
-            {item.content}
-          </Typography>
         </View>
-      </View>
+      </Button>
     );
   }
   return (
@@ -93,8 +106,12 @@ export default () => {
         <HeaderButton iconName="settings-outline" onPress={onPressSetting} />
       </Header>
 
-      <View style={{ flex: 1,  }}>
-        <FlatList data={data} renderItem={renderItem} contentContainerStyle={{paddingHorizontal: 24,}}/>
+      <View style={{ flex: 1 }}>
+        <FlatList
+          data={data}
+          renderItem={renderItem}
+          contentContainerStyle={{ paddingHorizontal: 24 }}
+        />
       </View>
       <View
         style={{

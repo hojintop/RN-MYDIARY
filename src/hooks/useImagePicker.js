@@ -3,13 +3,12 @@ import { Platform } from "react-native";
 
 export async function useImagePicker(allowsEditing){
     try{
-        console.log(333);
         const imagePickerResult = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: "images",
             allowsEditing,
         })
     
-        if(imagePickerResult.canceled) return;
+        if(imagePickerResult.canceled) return null;
     
         const pikPhotoResultArray = imagePickerResult.assets.map((item)=>{
             const uri = item.uri;
