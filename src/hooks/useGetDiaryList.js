@@ -9,7 +9,6 @@ export const useGetDiaryList = ()=>{
     const userInfo = useRecoilValue(stateUserInfo);
     
     return useCallback(async(userInfo)=>{
-        console.log(userInfo);
         const userDiaryDB = database().ref(`diary/${userInfo.uid}`);
 
         const diaryListResult = await userDiaryDB.once("value").then((snapshot)=>{
