@@ -2,7 +2,7 @@ import { TextInput, View } from "react-native";
 
 export default (props) => {
   return (
-    <View style={{ flex: 1, flexDirection: "row", paddingHorizontal: 24 }}>
+    <View style={{flexDirection: "row", paddingHorizontal: 24,}}>
         {/* input autoFocus & hidden */}
         
         <TextInput

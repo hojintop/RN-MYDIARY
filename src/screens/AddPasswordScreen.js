@@ -6,17 +6,30 @@ import HeaderTitle from "../components/Header/HeaderTitle";
 import Spacer from "../components/Spacer";
 import { View } from "react-native";
 import PasswordInputBox from "../components/PasswordInputBox";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useRecoilValue } from "recoil";
+import { stateUserInfo } from "../states/stateUserInfo";
+import database from "@react-native-firebase/database";
 
 export default () => {
   const [firstInput, setFirstInput] = useState("");
   const [secondInput, setSecondInput] = useState("");
   const [isInputFirst, setIsInputFirst] = useState(true);
+  const userInfo = useRecoilValue(stateUserInfo);
 
   const navigation = useNavigation();
 
   function onPressBack() {
     navigation.goBack();
+  }
+
+  async function updatePassword(){
+    const userDBRefKey = `users/${userInfo.uid}`;
+    await database().ref(userDBRefKey).update({
+      password: secondInput
+    })
+    
+    onPressBack();
   }
 
   useEffect(()=>{
@@ -25,6 +38,7 @@ export default () => {
 
     if(firstInput === secondInput){
         // 저장하기
+        updatePassword();
     }
   },[firstInput,secondInput])
 

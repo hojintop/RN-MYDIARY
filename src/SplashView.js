@@ -1,4 +1,4 @@
-import { View } from "react-native";
+import { TextInput, View } from "react-native";
 import Typography from "./components/Typography";
 import { useEffect, useState } from "react";
 import {
@@ -7,9 +7,10 @@ import {
 } from "@react-native-google-signin/google-signin";
 import firebaseAuth from "@react-native-firebase/auth";
 import database from "@react-native-firebase/database";
-import { useRecoilValue, useSetRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { stateUserInfo } from "./states/stateUserInfo";
 import { useGetDiaryList } from "./hooks/useGetDiaryList";
+import PasswordInputBox from "./components/PasswordInputBox";
 
 export default (props) => {
   // useEffect(()=>{
@@ -25,9 +26,10 @@ export default (props) => {
   // )
 
   const [showLoginButton, setShowLoginButton] = useState(false);
-  const [isLoadfinish, setIsLoadfinish] = useState(false);
+  const [passwordInput, setPasswodInput] = useState("");
+  const [isPasswordCheck, setIsPasswordCheck] = useState(false);
 
-  const setUserInfo = useSetRecoilState(stateUserInfo);
+  const [userInfo, setUserInfo] = useRecoilState(stateUserInfo);
 
   const runGetDiaryList = useGetDiaryList();
 
@@ -48,7 +50,6 @@ export default (props) => {
         });
 
       // console.log(userResult);
-      const now = new Date().toISOString();
 
       if (userResult === null) {
         await database().ref(userDBRefKey).set({
@@ -60,9 +61,7 @@ export default (props) => {
           lastLoginAt: now,
         });
       } else {
-        await database().ref(userDBRefKey).update({
-          lastLoginAt: now,
-        });
+        
       }
 
       const userInfo = await database()
@@ -74,7 +73,12 @@ export default (props) => {
 
       runGetDiaryList(userInfo);
 
-      props.onFinishLoad();
+      if (userInfo.password !== "") {
+        setIsPasswordCheck(true);
+      }
+
+
+      // props.onFinishLoad();
     } catch (ex) {
       console.log(ex);
     }
@@ -103,11 +107,30 @@ export default (props) => {
 
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      {showLoginButton ? (
-        <GoogleSigninButton onPress={onPressGoogleSignin} />
-      ) : (
-        <Typography fontSize={26}>SPLASH & LOAD DATA</Typography>
-      )}
+
+        {showLoginButton ? (
+          <GoogleSigninButton onPress={onPressGoogleSignin} />
+        ) : (
+          <PasswordInputBox
+            value={passwordInput}
+            onChangeText={async(text) => {
+              setPasswodInput(text);
+              
+              if(text.length === 4){
+                if(userInfo.password === text){
+                  const now = new Date().toISOString();
+                  const userDBRefKey = `/users/${userInfo.uid}`;
+                  await database().ref(userDBRefKey).update({
+                    lastLoginAt: now,
+                  });
+                  props.onFinishLoad();
+                }
+              }
+            }}
+          />
+          // <Typography fontSize={26}>SPLASH & LOAD DATA</Typography>
+        )}
+
     </View>
   );
 };
