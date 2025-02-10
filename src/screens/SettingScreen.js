@@ -13,11 +13,13 @@ import Icons from "../components/Icons";
 import Button from "../components/Button";
 import { useImagePicker } from "../hooks/useImagePicker";
 import Dvider from "../components/Dvider";
+import database from "@react-native-firebase/database";
 
 export default () => {
   const navigation = useNavigation();
   //   const userInfo = useRecoilValue(stateUserInfo);
   const [userInfo, setUserInfo] = useRecoilState(stateUserInfo);
+  const userDBRefKey = `/users/${userInfo.uid}`;
 
   function onPressBack() {
     navigation.goBack();
@@ -37,16 +39,26 @@ export default () => {
     // storage 에서 만약 이미지 url 정보를 받아 왔따면 database 의 내 profile 정보의 이미지 데이터update 할것..useImagePicker 에서 storage 관련 이슈 기재함
   }
 
-  function onPressAddPassword(){
+  function onPressAddPassword() {
     navigation.navigate("AddPassword");
   }
 
-  function onPressResetPassword(){
+  async function onPressResetPassword() {
+    console.log(userDBRefKey);
+    await database().ref(userDBRefKey).update({
+      password: "",
+    });
 
+    setUserInfo((prevState) => {
+      return {
+        ...prevState,
+        password: "",
+      };
+    });
   }
 
   return (
-    <View style={{ flex: 1, }}>
+    <View style={{ flex: 1 }}>
       <Header>
         <HeaderGroup>
           <HeaderButton iconName="arrow-back" onPress={onPressBack} />
@@ -55,7 +67,7 @@ export default () => {
         </HeaderGroup>
       </Header>
 
-      <View style={{alignItems: "center", paddingTop: 15 }}>
+      <View style={{ alignItems: "center", paddingTop: 15 }}>
         <View>
           <RemoteImage
             url={userInfo.profileImage}
@@ -79,19 +91,37 @@ export default () => {
       <Spacer space={20} />
       <Dvider />
       <Spacer space={20} />
-      
+
       <Button onPress={onPressAddPassword}>
-        <View style={{flexDirection: "row", justifyContent: "space-between", alignItems: "center" ,paddingVertical: 10, paddingHorizontal: 10}}>
-            <Typography fontSize={20}>비밀번호 추가</Typography>
-            <Icons name="chevron-forward-sharp" size={20}></Icons>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            paddingVertical: 10,
+            paddingHorizontal: 10,
+          }}
+        >
+          <Typography fontSize={20}>
+            {userInfo.password !== "" ? "비밀번호 수정" : "비밀번호 추가"}
+          </Typography>
+          <Icons name="chevron-forward-sharp" size={20}></Icons>
         </View>
       </Button>
 
-      <Button onPress={onPressResetPassword}>
-        <View style={{flexDirection: "row", justifyContent: "space-between", alignItems: "center" ,paddingVertical: 10, paddingHorizontal: 10}}>
-            <Typography fontSize={20}>비밀번호 초기화</Typography>
+      {userInfo.password !== "" && (<Button onPress={onPressResetPassword}>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            paddingVertical: 10,
+            paddingHorizontal: 10,
+          }}
+        >
+          <Typography fontSize={20}>비밀번호 초기화</Typography>
         </View>
-      </Button>
+      </Button>)}
     </View>
   );
 };

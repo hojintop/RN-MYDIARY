@@ -1,4 +1,4 @@
-import { TextInput, View } from "react-native";
+import { ActivityIndicator, TextInput, View } from "react-native";
 import Typography from "./components/Typography";
 import { useEffect, useState } from "react";
 import {
@@ -28,6 +28,7 @@ export default (props) => {
   const [showLoginButton, setShowLoginButton] = useState(false);
   const [passwordInput, setPasswodInput] = useState("");
   const [isPasswordCheck, setIsPasswordCheck] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   const [userInfo, setUserInfo] = useRecoilState(stateUserInfo);
 
@@ -61,7 +62,6 @@ export default (props) => {
           lastLoginAt: now,
         });
       } else {
-        
       }
 
       const userInfo = await database()
@@ -75,10 +75,16 @@ export default (props) => {
 
       if (userInfo.password !== "") {
         setIsPasswordCheck(true);
+      }else{
+        const now = new Date().toISOString();
+        console.log(111);
+        await database().ref(userDBRefKey).update({
+          lastLoginAt: now,
+        });
+  
+        props.onFinishLoad();
       }
-
-
-      // props.onFinishLoad();
+      
     } catch (ex) {
       console.log(ex);
     }
@@ -107,30 +113,39 @@ export default (props) => {
 
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      {showLoginButton ? (
+        <GoogleSigninButton onPress={onPressGoogleSignin} />
+      ) : isPasswordCheck ? (
+        <PasswordInputBox
+          value={passwordInput}
+          onChangeText={async (text) => {
+            setPasswodInput(text);
 
-        {showLoginButton ? (
-          <GoogleSigninButton onPress={onPressGoogleSignin} />
-        ) : (
-          <PasswordInputBox
-            value={passwordInput}
-            onChangeText={async(text) => {
-              setPasswodInput(text);
-              
-              if(text.length === 4){
-                if(userInfo.password === text){
-                  const now = new Date().toISOString();
-                  const userDBRefKey = `/users/${userInfo.uid}`;
-                  await database().ref(userDBRefKey).update({
-                    lastLoginAt: now,
-                  });
-                  props.onFinishLoad();
-                }
+            if (text.length === 4) {
+              if (userInfo.password === text) {
+                const now = new Date().toISOString();
+                const userDBRefKey = `/users/${userInfo.uid}`;
+                await database().ref(userDBRefKey).update({
+                  lastLoginAt: now,
+                });
+                props.onFinishLoad();
+              }else{
+                setErrorMessage("비밀번호가 틀립니다.");
+                setPasswodInput("");
               }
-            }}
-          />
-          // <Typography fontSize={26}>SPLASH & LOAD DATA</Typography>
-        )}
+            }
+          }}
+          errorMessage={errorMessage}
+        />
+      ) : (
+        <View>
+          <Typography fontSize={26}>SPLASH & LOAD DATA</Typography>
+          <ActivityIndicator /> 
+        </View>
+      )
 
+      // <Typography fontSize={26}>SPLASH & LOAD DATA</Typography>
+      }
     </View>
   );
 };
